@@ -56,7 +56,7 @@ input[type="datetime-local"]{appearance:none;-webkit-appearance:none;padding:14p
 }
 /* --- End Carro --- */
 
-.sheet{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top-left-radius:16px;border-top-right-radius:16px;max-height:70vh;transform:translateY(100%);transition:.25s;box-shadow:0 -12px 30px rgba(0,0,0,.2);border:1px solid var(--border);touch-action:none}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top-left-radius:16px;border-top-right-radius:16px;max-height:70vh;transform:translateY(100%);transition:.25s;box-shadow:0 -12px 30px rgba(0,0,0,.2);border:1px solid var(--border);touch-action:auto}
 .sheet.open{transform:translateY(0)}
 .sheet .handle{width:50px;height:6px;background:#e5e7eb;border-radius:999px;margin:10px auto;cursor:pointer}
 .sheet .body{padding:8px 14px 16px;overflow:auto;max-height:60vh}
@@ -278,29 +278,42 @@ function showView(v){
 }
 
 // Picker
-function openPicker(){ $('sheet').classList.add('open'); $('backdrop').classList.remove('hidden'); }
+function openPicker(){ $('sheet').classList.add('open'); $('backdrop').classList.remove('hidden'); setTimeout(()=>{ const s=$('pickerSearch'); if(s){ s.focus(); s.select(); } }, 50); }
 function closePicker(){ $('sheet').classList.remove('open'); $('backdrop').classList.add('hidden'); }
 function renderPickerList(){
   const cont=$('sheetBody'); cont.innerHTML='';
-  // Search box
-  const searchWrap=document.createElement('div');
-  searchWrap.style.cssText='position:sticky;top:0;background:var(--surface);padding:8px 0;margin-bottom:8px;z-index:5;border-bottom:1px solid var(--border)';
-  searchWrap.innerHTML = `<input id="picker-search" placeholder="Buscar producto..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text)"/>`;
-  cont.appendChild(searchWrap);
-  const input=searchWrap.querySelector('#picker-search');
-  input.addEventListener('input', ()=>renderPickerList());
-  const q=(input.value||'').toLowerCase();
+  const wrap=document.createElement('div');
+  wrap.innerHTML = `
+    <div class="card" style="position:sticky;top:0;background:var(--surface);z-index:1;padding-top:6px;padding-bottom:10px;">
+      <label>Buscar producto</label>
+      <input id="pickerSearch" placeholder="Escribe para filtrar..." autocomplete="off">
+    </div>
+  `;
+  cont.appendChild(wrap.firstElementChild);
 
-  const productos=store.get('productos',[]).sort((a,b)=>a.nombre.localeCompare(b.nombre))
-                      .filter(p=>p.nombre.toLowerCase().includes(q));
-  for(const p of productos){
-    const row=document.createElement('div'); row.className='item';
-    row.innerHTML=`<div><div class='title-sm'>${p.nombre}</div><div class='muted'>${fmt.format(p.precio)}</div></div>
-                  <div class="row-actions" style="justify-content:flex-end">
-                    <button class='btn' style="background:#10a37f;border-color:#10a37f" onclick="addFromPicker('${p.id}')">Agregar</button>
-                  </div>`;
-    cont.appendChild(row);
+  const list=document.createElement('div');
+  cont.appendChild(list);
+
+  const base = store.get('productos',[]).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+
+  function render(items){
+    list.innerHTML='';
+    for(const p of items){
+      const row=document.createElement('div'); row.className='item';
+      row.innerHTML=`<div><div class='title-sm'>${p.nombre}</div><div class='muted'>$${(p.precio||0).toLocaleString('es-CL')}</div></div>
+      <div><button class="btn btn--small" style="background:#10a37f;border-color:#10a37f" onclick="addFromPicker('${p.id}')">Agregar</button></div>`;
+      list.appendChild(row);
+    }
   }
+
+  render(base);
+
+  const input=$('pickerSearch');
+  input.addEventListener('input', ()=>{
+    const q=(input.value||'').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'');
+    const filtered = base.filter(p => (p.nombre||'').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').includes(q));
+    render(filtered);
+  });
 }
 function addFromPicker(id){ agregarAlCarro(id); }
 
@@ -329,18 +342,18 @@ function drawReceiptToCanvas(v){
   const W=1120, H= Math.max(740, 400 + v.items.length*42);
   const canvas = document.createElement('canvas'); canvas.width=W; canvas.height=H;
   const ctx = canvas.getContext('2d');
-  const bg = '#ffffff'; const fg = '#0b1220'; const green = '#13A37E'; const grid = '#cfe9df';
+  const bg = '#ffffff'; const fg = '#0b1220'; const green = '#13A37E'; const grid = '#cfe9df'; const brandRed = '#e60019';
   const money = n => new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
   ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
   let x=70, y=120;
-  ctx.fillStyle=fg; ctx.font='bold 22px Arial'; ctx.textAlign='left'; ctx.fillText("MERCADITO QUILICURA SPA", x, y); y+=28;
+  ctx.fillStyle=brandRed; ctx.font='bold 22px Arial'; ctx.textAlign='left'; ctx.fillText("MERCADITO QUILICURA SPA", x, y); y+=28;
   ctx.font='16px Arial'; ctx.fillText('Giro: VENTA DE TODO TIPO DE ALIMENTOS', x, y); y+=22;
   ctx.fillText('Dirección: AV. LAS TORRES SUR 191 A', x, y); y+=22;
   ctx.fillText('Comuna: Quilicura', x, y); y+=22;
   ctx.fillText('Ciudad: Santiago', x, y); y+=22;
   ctx.fillText('Región: Metropolitana de Santiago', x, y);
   const boxX = W-380, boxY=90, boxW=300, boxH=120;
-  ctx.strokeStyle='#e74c3c'; ctx.lineWidth=3; ctx.strokeRect(boxX, boxY, boxW, boxH);
+  ctx.strokeStyle=brandRed; ctx.lineWidth=3; ctx.strokeRect(boxX, boxY, boxW, boxH);
   ctx.fillStyle=fg; ctx.textAlign='center';
   ctx.font='16px Arial'; ctx.fillText('R.U.T.: 77.934.268-9', boxX+boxW/2, boxY+28);
   ctx.font='bold 18px Arial'; ctx.fillText('N° DE PEDIDO', boxX+boxW/2, boxY+58);
@@ -348,8 +361,10 @@ function drawReceiptToCanvas(v){
   ctx.textAlign='left';
   ctx.fillStyle=fg; ctx.font='14px Arial'; ctx.fillText('Fecha de Emisión', boxX, boxY+150);
   ctx.font='bold 14px Arial'; ctx.fillText(v.fecha, boxX+160, boxY+150);
-  ctx.fillStyle=fg; ctx.font='14px Arial'; ctx.fillText('Hora de transacción', boxX, boxY+172);
-  ctx.font='bold 14px Arial'; ctx.fillText((v.fecha.split(' ')[1]||'').slice(0,5), boxX+160, boxY+172);
+  // Hora de transacción
+  const hora=(v.fecha||'').split(' ')[1]||'';
+  ctx.fillStyle=fg; ctx.font='14px Arial'; ctx.fillText('Hora de transacción', boxX, boxY+170);
+  ctx.font='bold 14px Arial'; ctx.fillText(hora, boxX+160, boxY+170);
   const thY = boxY+190;
   ctx.fillStyle=green; ctx.fillRect(50, thY, W-100, 28);
   ctx.fillStyle='#ffffff'; ctx.font='bold 14px Arial'; ctx.fillText('DETALLE DEL DOCUMENTO', 60, thY+19);
@@ -359,7 +374,7 @@ function drawReceiptToCanvas(v){
   ctx.fillText('Nombre', 60, rowStart+18);
   ctx.fillText('Cantidad', 520, rowStart+18);
   ctx.fillText('P. Unitario', 660, rowStart+18);
-  ctx.textAlign='right'; ctx.fillText('Subtotal', 1040, rowStart+18); ctx.textAlign='left';
+  ctx.fillText('Subtotal', 820, rowStart+18);
   let iy=rowStart+40;
   ctx.font='13px Arial'; ctx.fillStyle=fg;
   for(const it of v.items){
