@@ -347,11 +347,11 @@ function drawReceiptToCanvas(v){
   ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
   let x=70, y=120;
   ctx.fillStyle=brandRed; ctx.font='bold 22px Arial'; ctx.textAlign='left'; ctx.fillText("MERCADITO QUILICURA SPA", x, y); y+=28;
-  ctx.font='16px Arial'; ctx.fillText('Giro: VENTA DE TODO TIPO DE ALIMENTOS', x, y); y+=22;
-  ctx.fillText('Dirección: AV. LAS TORRES SUR 191 A', x, y); y+=22;
-  ctx.fillText('Comuna: Quilicura', x, y); y+=22;
-  ctx.fillText('Ciudad: Santiago', x, y); y+=22;
-  ctx.fillText('Región: Metropolitana de Santiago', x, y);
+  ctx.fillStyle=fg; ctx.font='16px Arial'; ctx.fillStyle=fg; ctx.fillStyle=fg; ctx.fillText('Giro: VENTA DE TODO TIPO DE ALIMENTOS', x, y); y+=22;
+  ctx.fillStyle=fg; ctx.fillStyle=fg; ctx.fillText('Dirección: AV. LAS TORRES SUR 191 A', x, y); y+=22;
+  ctx.fillStyle=fg; ctx.fillStyle=fg; ctx.fillText('Comuna: Quilicura', x, y); y+=22;
+  ctx.fillStyle=fg; ctx.fillStyle=fg; ctx.fillText('Ciudad: Santiago', x, y); y+=22;
+  ctx.fillStyle=fg; ctx.fillStyle=fg; ctx.fillText('Región: Metropolitana de Santiago', x, y);
   const boxX = W-380, boxY=90, boxW=300, boxH=120;
   ctx.strokeStyle=brandRed; ctx.lineWidth=3; ctx.strokeRect(boxX, boxY, boxW, boxH);
   ctx.fillStyle=fg; ctx.textAlign='center';
@@ -374,7 +374,7 @@ function drawReceiptToCanvas(v){
   ctx.fillText('Nombre', 60, rowStart+18);
   ctx.fillText('Cantidad', 520, rowStart+18);
   ctx.fillText('P. Unitario', 660, rowStart+18);
-  ctx.fillText('Subtotal', 820, rowStart+18);
+  ctx.textAlign='right'; ctx.fillText('Subtotal', 1040, rowStart+18); ctx.textAlign='left';
   let iy=rowStart+40;
   ctx.font='13px Arial'; ctx.fillStyle=fg;
   for(const it of v.items){
