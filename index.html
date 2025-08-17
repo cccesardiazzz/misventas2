@@ -1,15 +1,14 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="es">
 <head>
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-
-  <meta name="apple-mobile-web-app-capable" content="yes">
-
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#000000"/>
+<meta content="default" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport">
+<meta content="#000000" name="theme-color"/>
 <title>Mis Ventas — PWA</title>
-<link rel="manifest" href="manifest.webmanifest">
+<link href="manifest.webmanifest" rel="manifest"/>
 <style>
 :root{
   --bg:#eef0f4; --surface:#ffffff; --text:#0b1220; --muted:#687182;
@@ -86,17 +85,14 @@ input[type="datetime-local"]{appearance:none;-webkit-appearance:none;padding:14p
 #appToast.show{opacity:1;transform:translateX(-50%) scale(1)}
 
 </style>
-
-    <style id="IOS_KEYBOARD_FIX_CSS">
+<style id="IOS_KEYBOARD_FIX_CSS">
       html, body { height: 100%; -webkit-text-size-adjust: 100%; }
       body.fix-ios-kb { position: static !important; overflow-y: auto !important; }
       input, textarea, select { font-size: 16px; }
       /* Avoid transform on input parents which can block the keyboard in iOS WKWebView */
       .avoid-transform * { transform: none !important; }
     </style>
-    
-
-    <script id="IOS_KEYBOARD_FIX">
+<script id="IOS_KEYBOARD_FIX">
     (function(){
       var ua = navigator.userAgent.toLowerCase();
       var isIOS = /iphone|ipad|ipod/.test(ua);
@@ -155,118 +151,102 @@ input[type="datetime-local"]{appearance:none;-webkit-appearance:none;padding:14p
       });
     })();
     </script>
-    
-</head>
+</meta></meta></head>
 <body>
-<header id="appHeader" class="hidden">
-  <div class="wrap">
-    <div class="header-row">
-      <div class="logo-title">Mis Ventas</div>
-      <div class="right-actions">
-        <div class="circle" id="avatarCircle" title="Cuenta / Ajustes" onclick="showView('ajustes')"><span id="avatarText">?</span></div>
-      </div>
-    </div>
-    <nav>
-      <button class="tab active" id="tab-vender" onclick="showView('vender')">Vender</button>
-      <button class="tab" id="tab-historial" onclick="showView('historial')">Historial</button>
-      <button class="tab" id="tab-productos" onclick="showView('productos')">Productos</button>
-    </nav>
-  </div>
+<header class="hidden" id="appHeader">
+<div class="wrap">
+<div class="header-row">
+<div class="logo-title">Mis Ventas</div>
+<div class="right-actions">
+<div class="circle" id="avatarCircle" onclick="showView('ajustes')" title="Cuenta / Ajustes"><span id="avatarText">?</span></div>
+</div>
+</div>
+<nav>
+<button class="tab active" id="tab-vender" onclick="showView('vender')">Vender</button>
+<button class="tab" id="tab-historial" onclick="showView('historial')">Historial</button>
+<button class="tab" id="tab-productos" onclick="showView('productos')">Productos</button>
+</nav>
+</div>
 </header>
-
 <main class="container">
-  <!-- AUTH -->
-  <section id="view-auth" class="card" style="max-width:420px;margin:28px auto">
-    <h2 style="margin:6px 0 10px;">Bienvenido(a)</h2>
-    <p class="muted" style="margin-top:0">Inicia sesión con tu RUT y PIN de 6 dígitos o crea una cuenta.</p>
-    <div id="loginForm">
-      <label>RUT</label><input id="login-rut" placeholder="12345678-9">
-      <label style="margin-top:8px;">PIN (6 dígitos)</label><input id="login-pin" type="password" inputmode="numeric" autocomplete="one-time-code" placeholder="••••••" maxlength="6">
-      <div style="margin-top:12px;display:grid;grid-template-columns:1fr;gap:10px">
-        <button class="btn" onclick="doLogin()">Entrar</button>
-        <button class="btn" onclick="switchAuth()">Registrarse</button>
-      </div>
-      <p id="login-hint" class="muted" style="font-size:12px;margin-top:8px;"></p>
-    </div>
+<!-- AUTH -->
+<section class="card" id="view-auth" style="max-width:420px;margin:28px auto">
+<h2 style="margin:6px 0 10px;">Bienvenido(a)</h2>
+<p class="muted" style="margin-top:0">Inicia sesión con tu RUT y PIN de 6 dígitos o crea una cuenta.</p>
+<div id="loginForm">
+<label>RUT</label><input id="login-rut" placeholder="12345678-9"/>
+<label style="margin-top:8px;">PIN (6 dígitos)</label><input autocomplete="one-time-code" id="login-pin" inputmode="numeric" maxlength="6" placeholder="••••••" type="password"/>
+<div style="margin-top:12px;display:grid;grid-template-columns:1fr;gap:10px">
+<button class="btn" onclick="doLogin()">Entrar</button>
+<button class="btn" onclick="switchAuth()">Registrarse</button>
+</div>
+<p class="muted" id="login-hint" style="font-size:12px;margin-top:8px;"></p>
+</div>
+<div class="hidden" id="registerForm">
+<label>Nombre y Apellido</label><input id="reg-name" placeholder="Ej: César Díaz"/>
+<label style="margin-top:8px;">RUT</label><input id="reg-rut" placeholder="12345678-9"/>
+<label style="margin-top:8px;">PIN (6 dígitos)</label><input autocomplete="one-time-code" id="reg-pin" inputmode="numeric" maxlength="6" placeholder="••••••" type="password"/>
+<div style="margin-top:12px;display:grid;grid-template-columns:1fr;gap:10px">
+<button class="btn" onclick="doRegister()">Crear cuenta</button>
+<button class="btn" onclick="switchAuth()">Ya tengo cuenta</button>
+</div>
+<p class="muted" id="reg-hint" style="font-size:12px;margin-top:8px;"></p>
+</div>
+</section>
+<!-- Vender -->
+<section class="hidden" id="view-vender">
+<div class="card"><label>Nombre del Cliente</label><input id="cliente" placeholder="Ej: César Díaz"/></div>
+<div class="card"><label>Fecha y hora</label><input id="fechaHora" type="datetime-local"/></div>
+<div class="card"><label>Seleccionar el producto</label><div class="picker" onclick="openPicker()"><span id="pickerLabel">Elegir producto</span><span class="muted">▼</span></div></div>
+<div class="card">
+<div class="title-sm" style="margin-bottom:8px;">Carro</div>
+<div class="cart" id="carro"><span class="muted">Sin productos aún.</span></div>
+</div>
+<div class="card">
+<div class="title-sm" style="margin-bottom:8px;">Resumen</div>
+<div style="display:flex;justify-content:space-between;margin:6px 0;"><span>Cantidad Total:</span><strong id="cantidadTotal">0 Productos</strong></div>
 
-    <div id="registerForm" class="hidden">
-      <label>Nombre y Apellido</label><input id="reg-name" placeholder="Ej: César Díaz">
-      <label style="margin-top:8px;">RUT</label><input id="reg-rut" placeholder="12345678-9">
-      <label style="margin-top:8px;">PIN (6 dígitos)</label><input id="reg-pin" type="password" inputmode="numeric" autocomplete="one-time-code" placeholder="••••••" maxlength="6">
-      <div style="margin-top:12px;display:grid;grid-template-columns:1fr;gap:10px">
-        <button class="btn" onclick="doRegister()">Crear cuenta</button>
-        <button class="btn" onclick="switchAuth()">Ya tengo cuenta</button>
-      </div>
-      <p id="reg-hint" class="muted" style="font-size:12px;margin-top:8px;"></p>
-    </div>
-  </section>
+<div style="display:flex;justify-content:space-between;margin:6px 0;"><span>Venta Total:</span><strong id="ventaTotal">$0</strong></div>
+</div>
+<div class="card">
+<div class="row-actions">
+<button class="btn btn--small" id="btnCompartir" style="background:var(--green);border-color:var(--green)">Compartir y Guardar</button>
+<button class="btn btn--small" id="btnLimpiar" style="background:var(--red);border-color:var(--red)">Limpiar</button>
+</div>
+</div>
+</section>
+<!-- Historial -->
+<section class="hidden" id="view-historial">
+<div class="card"><label>Buscar por N° o cliente</label><input id="buscar" oninput="aplicarFiltro()" placeholder="Ej: 0123 o César"/></div>
+<div class="list" id="historial"></div>
+</section>
+<!-- Productos -->
+<section class="hidden" id="view-productos">
+<div class="card"><div class="title-sm" style="margin-bottom:8px;">Nuevo producto</div>
+<label>Nombre</label><input id="prod-nombre" placeholder="Nombre"/>
+<label style="margin-top:8px;">Precio</label><input id="prod-precio" min="0" placeholder="Precio" type="number"/>
+<div style="margin-top:10px"><button class="btn" onclick="agregarProducto()">Agregar</button></div>
+</div>
+<div class="card"><div class="title-sm" style="margin-bottom:8px;">Catálogo</div><div class="list" id="catalogo"></div></div>
+</section>
+<!-- Ajustes -->
+<section class="hidden" id="view-ajustes">
+<div class="card settings-row">
+<div class="title-sm">Tema</div>
+<div class="settings-actions">
+<button aria-pressed="false" class="btn btn--small" id="btn-light" onclick="setThemeSel('light')" style="min-width:150px">☀ Claro</button>
+<button aria-pressed="false" class="btn btn--small" id="btn-dark" onclick="setThemeSel('dark')" style="min-width:150px">🌙 Oscuro</button>
+</div>
+</div>
 
-  <!-- Vender -->
-  <section id="view-vender" class="hidden">
-    <div class="card"><label>Nombre del Cliente</label><input id="cliente" placeholder="Ej: César Díaz"></div>
-    <div class="card"><label>Fecha y hora</label><input id="fechaHora" type="datetime-local"></div>
-    <div class="card"><label>Seleccionar el producto</label><div class="picker" onclick="openPicker()"><span id="pickerLabel">Elegir producto</span><span class="muted">▼</span></div></div>
-    <div class="card">
-      <div class="title-sm" style="margin-bottom:8px;">Carro</div>
-      <div id="carro" class="cart"><span class="muted">Sin productos aún.</span></div>
-    </div>
-    <div class="card">
-      <div class="title-sm" style="margin-bottom:8px;">Resumen</div>
-      <div style="display:flex;justify-content:space-between;margin:6px 0;"><span>Cantidad Total:</span><strong id="cantidadTotal">0</strong></div>
-      <div style="display:flex;justify-content:space-between;margin:6px 0;"><span>IVA (<span id="iva-rate">19</span>%)</span><strong id="iva">$0</strong></div>
-      <div style="display:flex;justify-content:space-between;margin:6px 0;"><span>Venta Total:</span><strong id="ventaTotal">$0</strong></div>
-    </div>
-    <div class="card">
-      <div class="row-actions">
-        <button id="btnCompartir" class="btn btn--small" style="background:var(--green);border-color:var(--green)">Compartir y Guardar</button>
-        <button id="btnLimpiar" class="btn btn--small" style="background:var(--red);border-color:var(--red)">Limpiar</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Historial -->
-  <section id="view-historial" class="hidden">
-    <div class="card"><label>Buscar por N° o cliente</label><input id="buscar" placeholder="Ej: 0123 o César" oninput="aplicarFiltro()"></div>
-    <div id="historial" class="list"></div>
-  </section>
-
-  <!-- Productos -->
-  <section id="view-productos" class="hidden">
-    <div class="card"><div class="title-sm" style="margin-bottom:8px;">Nuevo producto</div>
-      <label>Nombre</label><input id="prod-nombre" placeholder="Nombre">
-      <label style="margin-top:8px;">Precio</label><input id="prod-precio" type="number" min="0" placeholder="Precio">
-      <div style="margin-top:10px"><button class="btn" onclick="agregarProducto()">Agregar</button></div>
-    </div>
-    <div class="card"><div class="title-sm" style="margin-bottom:8px;">Catálogo</div><div id="catalogo" class="list"></div></div>
-  </section>
-
-  <!-- Ajustes -->
-  <section id="view-ajustes" class="hidden">
-    <div class="card settings-row">
-      <div class="title-sm">Tema</div>
-      <div class="settings-actions">
-        <button id="btn-light" class="btn btn--small" style="min-width:150px" onclick="setThemeSel('light')" aria-pressed="false">☀ Claro</button>
-        <button id="btn-dark" class="btn btn--small" style="min-width:150px" onclick="setThemeSel('dark')" aria-pressed="false">🌙 Oscuro</button>
-      </div>
-    </div>
-    <div class="card settings-row">
-      <div class="title-sm">IVA</div>
-      <div class="settings-actions">
-        <input id="iva-input" type="number" min="0" max="100" value="19" style="width:100px;margin-right:8px">
-        <button class="btn btn--small" style="min-width:150px" onclick="guardarIVA()">Guardar IVA</button>
-      </div>
-    </div>
-    <div class="card"><div class="center"><button class="btn" style="background:var(--red);border-color:var(--red);min-width:220px" onclick="logout()">Cerrar sesión</button></div></div>
-  </section>
+<div class="card"><div class="center"><button class="btn" onclick="logout()" style="background:var(--red);border-color:var(--red);min-width:220px">Cerrar sesión</button></div></div>
+</section>
 </main>
-<div id="appToast" role="status" aria-live="polite"></div>
-
-<div id="backdrop" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(1px)"></div>
+<div aria-live="polite" id="appToast" role="status"></div>
+<div class="hidden" id="backdrop" style="position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(1px)"></div>
 <div class="sheet" id="sheet"><div class="handle" title="Cerrar"></div><div class="body" id="sheetBody"></div></div>
-
 <!-- Success overlay (solo desde Vender) -->
 <div id="successOverlay"><div id="successCard"><div class="check">✓</div><div style="font-weight:800">Venta realizada</div></div></div>
-
 <script>
 const $ = id => document.getElementById(id);
 const fmt = new Intl.NumberFormat('es-CL',{ style:'currency', currency:'CLP', maximumFractionDigits:0 });
@@ -323,7 +303,7 @@ let carro=[];
 
 function bootApp(){
   for(const [k,v] of Object.entries(defaults)){ if(store.get(k)==null) store.set(k,v); }
-  $('iva-rate').textContent=19; $('iva-input').value=19;
+  $('iva-rate').textContent=store.get('iva',19); $('iva-input').value=store.get('iva',19);
   const now = new Date(); const tz = now.getTimezoneOffset()*60000; const localISO = new Date(now - tz).toISOString().slice(0,16);
   $('fechaHora').value = localISO;
   renderCatalogo(); renderPickerList(); renderCarro(); renderHistorial();
@@ -417,15 +397,12 @@ function renderCarro(){
 }
 function incQty(id){ const it=carro.find(x=>x.idProd===id); if(!it) return; it.qty++; renderCarro(); }
 function decQty(id){ const it=carro.find(x=>x.idProd===id); if(!it) return; it.qty--; if(it.qty<=0) carro=carro.filter(x=>x.idProd!==id); renderCarro(); }
-function calcTotals(){ const ivaRate=19; const neto=carro.reduce((s,i)=>s+i.precio*i.qty,0); const iva=Math.round(neto*ivaRate/100); const total=neto+iva; const qtyTotal = carro.reduce((a,b)=>a+(b.qty||0),0);
+function calcTotals(){ const ivaRate=store.get('iva',19); const neto=carro.reduce((s,i)=>s+i.precio*i.qty,0); const iva=Math.round(neto*ivaRate/100); const total=neto+iva; const qtyTotal = carro.reduce((a,b)=>a+(b.qty||0),0);
   return {neto,iva,total,ivaRate,qtyTotal}; }
 function updateTotals(){ 
-  const t=calcTotals(); 
-  if($('cantidadTotal')){ 
-    const n=(t.qtyTotal||0); 
-    $('cantidadTotal').textContent = n + ' ' + (n===1 ? 'Producto' : 'Productos'); 
-  } 
-  if($('ventaTotal')) $('ventaTotal').textContent=fmt.format(t.total||0); 
+  const t = calcTotals();
+  const qtyEl = $('cantidadTotal'); if(qtyEl) qtyEl.textContent = (t.qtyTotal||0) + ' Productos';
+  const totEl = $('ventaTotal'); if(totEl) totEl.textContent = fmt.format(t.total||0);
 }
 
 // Recibo (imagen para compartir)
@@ -506,7 +483,7 @@ function showSuccess(){
   setTimeout(()=>{ o.style.display='none'; }, 1100);
 }
 
-async async function compartirYGuardar(){
+async function compartirYGuardar(){
   if(carro.length===0){ alert('Agrega productos al carro.'); return; }
   const nombre=($('cliente').value||'').trim();
   if(!nombre){ alert('Ingresa el nombre del cliente.'); return; } // obligatorio
@@ -601,7 +578,7 @@ function renderCatalogo(){
   }
   renderPickerList();
 }
-function guardarIVA(){ const val=Number($('iva-input').value||19); if(!(val>=0 && val<=100)) return alert('IVA inválido');  $('iva-rate').textContent=val; updateTotals(); alert('IVA guardado'); }
+function guardarIVA(){ const val=Number($('iva-input').value||19); if(!(val>=0 && val<=100)) return alert('IVA inválido'); store.set('iva',val); $('iva-rate').textContent=val; updateTotals(); alert('IVA guardado'); }
 function agregarProducto(){ const nombre=($('prod-nombre').value||'').trim(); const precio=Number($('prod-precio').value||'0'); if(!nombre || !(precio>=0)) return alert('Completa nombre y precio.'); const productos=store.get('productos',[]); productos.push({id:crypto.randomUUID(), nombre, precio}); store.set('productos',productos); $('prod-nombre').value=''; $('prod-precio').value=''; renderCatalogo(); }
 function editarProducto(id){ const productos=store.get('productos',[]); const p=productos.find(x=>x.id===id); if(!p) return; const nuevo=prompt('Nuevo precio para '+p.nombre, p.precio); if(nuevo===null) return; const val=Number(nuevo); if(!(val>=0)) return alert('Precio inválido'); p.precio=val; store.set('productos',productos); renderCatalogo(); }
 function eliminarProducto(id){ const productos=store.get('productos',[]).filter(x=>x.id!==id); store.set('productos',productos); renderCatalogo(); }
