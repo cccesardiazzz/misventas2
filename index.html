@@ -323,7 +323,7 @@ let carro=[];
 
 function bootApp(){
   for(const [k,v] of Object.entries(defaults)){ if(store.get(k)==null) store.set(k,v); }
-  $('iva-rate').textContent=store.get('iva',19); $('iva-input').value=store.get('iva',19);
+  $('iva-rate').textContent=19; $('iva-input').value=19;
   const now = new Date(); const tz = now.getTimezoneOffset()*60000; const localISO = new Date(now - tz).toISOString().slice(0,16);
   $('fechaHora').value = localISO;
   renderCatalogo(); renderPickerList(); renderCarro(); renderHistorial();
@@ -417,9 +417,16 @@ function renderCarro(){
 }
 function incQty(id){ const it=carro.find(x=>x.idProd===id); if(!it) return; it.qty++; renderCarro(); }
 function decQty(id){ const it=carro.find(x=>x.idProd===id); if(!it) return; it.qty--; if(it.qty<=0) carro=carro.filter(x=>x.idProd!==id); renderCarro(); }
-function calcTotals(){ const ivaRate=store.get('iva',19); const neto=carro.reduce((s,i)=>s+i.precio*i.qty,0); const iva=Math.round(neto*ivaRate/100); const total=neto+iva; const qtyTotal = carro.reduce((a,b)=>a+(b.qty||0),0);
+function calcTotals(){ const ivaRate=19; const neto=carro.reduce((s,i)=>s+i.precio*i.qty,0); const iva=Math.round(neto*ivaRate/100); const total=neto+iva; const qtyTotal = carro.reduce((a,b)=>a+(b.qty||0),0);
   return {neto,iva,total,ivaRate,qtyTotal}; }
-function updateTotals(){ const t=calcTotals(); if($('cantidadTotal')) $('cantidadTotal').textContent=(t.qtyTotal||0); if($('ventaTotal')) $('ventaTotal').textContent=fmt.format(t.total||0); }
+function updateTotals(){ 
+  const t=calcTotals(); 
+  if($('cantidadTotal')){ 
+    const n=(t.qtyTotal||0); 
+    $('cantidadTotal').textContent = n + ' ' + (n===1 ? 'Producto' : 'Productos'); 
+  } 
+  if($('ventaTotal')) $('ventaTotal').textContent=fmt.format(t.total||0); 
+}
 
 // Recibo (imagen para compartir)
 function drawReceiptToCanvas(v){
@@ -499,7 +506,7 @@ function showSuccess(){
   setTimeout(()=>{ o.style.display='none'; }, 1100);
 }
 
-async function compartirYGuardar(){
+async async function compartirYGuardar(){
   if(carro.length===0){ alert('Agrega productos al carro.'); return; }
   const nombre=($('cliente').value||'').trim();
   if(!nombre){ alert('Ingresa el nombre del cliente.'); return; } // obligatorio
@@ -594,7 +601,7 @@ function renderCatalogo(){
   }
   renderPickerList();
 }
-function guardarIVA(){ const val=Number($('iva-input').value||19); if(!(val>=0 && val<=100)) return alert('IVA inválido'); store.set('iva',val); $('iva-rate').textContent=val; updateTotals(); alert('IVA guardado'); }
+function guardarIVA(){ const val=Number($('iva-input').value||19); if(!(val>=0 && val<=100)) return alert('IVA inválido');  $('iva-rate').textContent=val; updateTotals(); alert('IVA guardado'); }
 function agregarProducto(){ const nombre=($('prod-nombre').value||'').trim(); const precio=Number($('prod-precio').value||'0'); if(!nombre || !(precio>=0)) return alert('Completa nombre y precio.'); const productos=store.get('productos',[]); productos.push({id:crypto.randomUUID(), nombre, precio}); store.set('productos',productos); $('prod-nombre').value=''; $('prod-precio').value=''; renderCatalogo(); }
 function editarProducto(id){ const productos=store.get('productos',[]); const p=productos.find(x=>x.id===id); if(!p) return; const nuevo=prompt('Nuevo precio para '+p.nombre, p.precio); if(nuevo===null) return; const val=Number(nuevo); if(!(val>=0)) return alert('Precio inválido'); p.precio=val; store.set('productos',productos); renderCatalogo(); }
 function eliminarProducto(id){ const productos=store.get('productos',[]).filter(x=>x.id!==id); store.set('productos',productos); renderCatalogo(); }
