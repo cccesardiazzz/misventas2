@@ -1,8 +1,12 @@
 <!doctype html>
 <html lang="es">
 <head>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#000000"/>
 <title>Mis Ventas — PWA</title>
 <link rel="manifest" href="manifest.webmanifest">
@@ -28,7 +32,7 @@ header{position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:
 .logo-title{font-size:42px;font-weight:900;letter-spacing:.2px}
 .right-actions{display:flex;gap:10px;align-items:center}
 .circle{width:40px;height:40px;border-radius:999px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;background:var(--soft);color:var(--text);font-weight:900;cursor:pointer}
-[data-theme="dark"] .circle{ border-color:#ffffff; } 
+[data-theme="dark"] .circle{ border-color:#000; } 
 nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:20px}
 .btn,.tab{appearance:none;border:2px solid var(--btnBorder);background:var(--btn);color:var(--btnText);padding:12px 16px;border-radius:999px;font-weight:900;text-align:center;font-size:16px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:.15s}
 .tab.active{ box-shadow: 0 0 0 2px var(--tabRing); } /* ring always visible */
@@ -56,7 +60,7 @@ input[type="datetime-local"]{appearance:none;-webkit-appearance:none;padding:14p
 }
 /* --- End Carro --- */
 
-.sheet{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top-left-radius:16px;border-top-right-radius:16px;max-height:70vh;transform:translateY(100%);transition:.25s;box-shadow:0 -12px 30px rgba(0,0,0,.2);border:1px solid var(--border);touch-action:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top-left-radius:16px;border-top-right-radius:16px;max-height:70vh;transform:translateY(100%);transition:.25s;box-shadow:0 -12px 30px rgba(0,0,0,.2);border:1px solid var(--border);touch-action:none}
 .sheet.open{transform:translateY(0)}
 .sheet .handle{width:50px;height:6px;background:#e5e7eb;border-radius:999px;margin:10px auto;cursor:pointer}
 .sheet .body{padding:8px 14px 16px;overflow:auto;max-height:60vh}
@@ -73,9 +77,85 @@ input[type="datetime-local"]{appearance:none;-webkit-appearance:none;padding:14p
 .center{text-align:center}
 #successOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.25);backdrop-filter:blur(2px);z-index:100}
 #successCard{background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:24px 32px;display:flex;flex-direction:column;align-items:center;gap:10px}
-#successCard .check{width:64px;height:64px;border-radius:999px;background:#10a37f;display:flex;align-items:center;justify-content:center;color:#fff;font-size:38px;font-weight:900}
+#successCard .check{width:64px;height:64px;border-radius:999px;background:#10a37f;display:flex;align-items:center;justify-content:center;color:#000;font-size:38px;font-weight:900}
+
+
+#appToast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) scale(.98);opacity:0;pointer-events:none;transition:.25s ease;z-index:9999;
+  background:var(--surface);color:var(--text);border:1px solid var(--border);box-shadow:var(--shadow);padding:12px 16px;border-radius:12px;
+  font-size:14px;max-width:90vw;text-align:center}
+#appToast.show{opacity:1;transform:translateX(-50%) scale(1)}
 
 </style>
+
+    <style id="IOS_KEYBOARD_FIX_CSS">
+      html, body { height: 100%; -webkit-text-size-adjust: 100%; }
+      body.fix-ios-kb { position: static !important; overflow-y: auto !important; }
+      input, textarea, select { font-size: 16px; }
+      /* Avoid transform on input parents which can block the keyboard in iOS WKWebView */
+      .avoid-transform * { transform: none !important; }
+    </style>
+    
+
+    <script id="IOS_KEYBOARD_FIX">
+    (function(){
+      var ua = navigator.userAgent.toLowerCase();
+      var isIOS = /iphone|ipad|ipod/.test(ua);
+      var isStandalone = (window.navigator.standalone === true) || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+      if (!(isIOS && isStandalone)) return;
+
+      // Prevent scripts from calling preventDefault on input touch that would cancel focus
+      function enableFocus(el){
+        try {
+          requestAnimationFrame(function(){ el.focus({preventScroll:true}); });
+        } catch(e) { try { el.focus(); } catch(e2) {} }
+      }
+
+      // If inputs are inside elements with transform or fixed, iOS sometimes blocks the keyboard.
+      // Mark containers to avoid transforms if focusing.
+      function markParents(el){
+        var p = el;
+        var seen = 0;
+        while (p && p !== document.body && seen < 5){
+          var cs = window.getComputedStyle(p);
+          if (cs.transform && cs.transform !== 'none'){
+            p.classList.add('avoid-transform');
+          }
+          if (cs.position === 'fixed'){
+            document.body.classList.add('fix-ios-kb');
+          }
+          p = p.parentElement;
+          seen++;
+        }
+      }
+
+      document.addEventListener('touchend', function(ev){
+        var t = ev.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)){
+          markParents(t);
+          enableFocus(t);
+        }
+      }, {passive:true});
+
+      // Also make click reliably focus
+      document.addEventListener('click', function(ev){
+        var t = ev.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)){
+          markParents(t);
+          enableFocus(t);
+        }
+      }, true);
+
+      // When leaving input, restore body state
+      document.addEventListener('focusout', function(ev){
+        if (ev.target && (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA')){
+          setTimeout(function(){
+            document.body.classList.remove('fix-ios-kb');
+          }, 300);
+        }
+      });
+    })();
+    </script>
+    
 </head>
 <body>
 <header id="appHeader" class="hidden">
@@ -132,9 +212,9 @@ input[type="datetime-local"]{appearance:none;-webkit-appearance:none;padding:14p
     </div>
     <div class="card">
       <div class="title-sm" style="margin-bottom:8px;">Resumen</div>
-      <div style="display:flex;justify-content:space-between;margin:6px 0;"><span>Subtotal:</span><strong id="neto">$0</strong></div>
+      <div style="display:flex;justify-content:space-between;margin:6px 0;"><span>Cantidad Total:</span><strong id="cantidadTotal">0</strong></div>
       <div style="display:flex;justify-content:space-between;margin:6px 0;"><span>IVA (<span id="iva-rate">19</span>%)</span><strong id="iva">$0</strong></div>
-      <div style="display:flex;justify-content:space-between;margin:6px 0;"><span>Total:</span><strong id="total">$0</strong></div>
+      <div style="display:flex;justify-content:space-between;margin:6px 0;"><span>Venta Total:</span><strong id="ventaTotal">$0</strong></div>
     </div>
     <div class="card">
       <div class="row-actions">
@@ -179,6 +259,7 @@ input[type="datetime-local"]{appearance:none;-webkit-appearance:none;padding:14p
     <div class="card"><div class="center"><button class="btn" style="background:var(--red);border-color:var(--red);min-width:220px" onclick="logout()">Cerrar sesión</button></div></div>
   </section>
 </main>
+<div id="appToast" role="status" aria-live="polite"></div>
 
 <div id="backdrop" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(1px)"></div>
 <div class="sheet" id="sheet"><div class="handle" title="Cerrar"></div><div class="body" id="sheetBody"></div></div>
@@ -278,8 +359,9 @@ function showView(v){
 }
 
 // Picker
-function openPicker(){ $('sheet').classList.add('open'); $('backdrop').classList.remove('hidden'); setTimeout(()=>{ const s=$('pickerSearch'); if(s){ s.focus(); s.select(); } }, 50); }
+function openPicker(){ $('sheet').classList.add('open'); $('backdrop').classList.remove('hidden'); }
 function closePicker(){ $('sheet').classList.remove('open'); $('backdrop').classList.add('hidden'); }
+
 function renderPickerList(){
   const cont=$('sheetBody'); cont.innerHTML='';
   const wrap=document.createElement('div');
@@ -315,6 +397,7 @@ function renderPickerList(){
     render(filtered);
   });
 }
+
 function addFromPicker(id){ agregarAlCarro(id); }
 
 // Carro
@@ -334,26 +417,27 @@ function renderCarro(){
 }
 function incQty(id){ const it=carro.find(x=>x.idProd===id); if(!it) return; it.qty++; renderCarro(); }
 function decQty(id){ const it=carro.find(x=>x.idProd===id); if(!it) return; it.qty--; if(it.qty<=0) carro=carro.filter(x=>x.idProd!==id); renderCarro(); }
-function calcTotals(){ const ivaRate=store.get('iva',19); const neto=carro.reduce((s,i)=>s+i.precio*i.qty,0); const iva=Math.round(neto*ivaRate/100); const total=neto+iva; return {neto,iva,total,ivaRate}; }
-function updateTotals(){ const t=calcTotals(); $('neto').textContent=fmt.format(t.neto); $('iva').textContent=fmt.format(t.iva); $('total').textContent=fmt.format(t.total); }
+function calcTotals(){ const ivaRate=store.get('iva',19); const neto=carro.reduce((s,i)=>s+i.precio*i.qty,0); const iva=Math.round(neto*ivaRate/100); const total=neto+iva; const qtyTotal = carro.reduce((a,b)=>a+(b.qty||0),0);
+  return {neto,iva,total,ivaRate,qtyTotal}; }
+function updateTotals(){ const t=calcTotals(); if($('cantidadTotal')) $('cantidadTotal').textContent=(t.qtyTotal||0); if($('ventaTotal')) $('ventaTotal').textContent=fmt.format(t.total||0); }
 
 // Recibo (imagen para compartir)
 function drawReceiptToCanvas(v){
   const W=1120, H= Math.max(740, 400 + v.items.length*42);
   const canvas = document.createElement('canvas'); canvas.width=W; canvas.height=H;
   const ctx = canvas.getContext('2d');
-  const bg = '#ffffff'; const fg = '#0b1220'; const green = '#13A37E'; const grid = '#cfe9df'; const brandRed = '#e60019';
+  const bg = '#ffffff'; const fg = '#0b1220'; const green = '#13A37E'; const grid = '#cfe9df';
   const money = n => new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
   ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
   let x=70, y=120;
-  ctx.fillStyle=brandRed; ctx.font='bold 22px Arial'; ctx.textAlign='left'; ctx.fillText("MERCADITO QUILICURA SPA", x, y); y+=28;
-  ctx.fillStyle=fg; ctx.font='16px Arial'; ctx.fillStyle=fg; ctx.fillStyle=fg; ctx.fillText('Giro: VENTA DE TODO TIPO DE ALIMENTOS', x, y); y+=22;
-  ctx.fillStyle=fg; ctx.fillStyle=fg; ctx.fillText('Dirección: AV. LAS TORRES SUR 191 A', x, y); y+=22;
-  ctx.fillStyle=fg; ctx.fillStyle=fg; ctx.fillText('Comuna: Quilicura', x, y); y+=22;
-  ctx.fillStyle=fg; ctx.fillStyle=fg; ctx.fillText('Ciudad: Santiago', x, y); y+=22;
-  ctx.fillStyle=fg; ctx.fillStyle=fg; ctx.fillText('Región: Metropolitana de Santiago', x, y);
+  ctx.fillStyle=fg; ctx.font='bold 22px Arial'; ctx.textAlign='left'; ctx.ctx.fillStyle = '#FF0000'; fillText("MERCADITO QUILICURA SPA", x, y); ctx.fillStyle = '#000000'; y+=28;
+  ctx.font='16px Arial'; ctx.fillText('Giro: VENTA DE TODO TIPO DE ALIMENTOS', x, y); y+=22;
+  ctx.fillText('Dirección: AV. LAS TORRES SUR 191 A', x, y); y+=22;
+  ctx.fillText('Comuna: Quilicura', x, y); y+=22;
+  ctx.fillText('Ciudad: Santiago', x, y); y+=22;
+  ctx.fillText('Región: Región Metropolitana de Santiago', x, y);
   const boxX = W-380, boxY=90, boxW=300, boxH=120;
-  ctx.strokeStyle=brandRed; ctx.lineWidth=3; ctx.strokeRect(boxX, boxY, boxW, boxH);
+  ctx.strokeStyle='#e74c3c'; ctx.lineWidth=3; ctx.strokeRect(boxX, boxY, boxW, boxH);
   ctx.fillStyle=fg; ctx.textAlign='center';
   ctx.font='16px Arial'; ctx.fillText('R.U.T.: 77.934.268-9', boxX+boxW/2, boxY+28);
   ctx.font='bold 18px Arial'; ctx.fillText('N° DE PEDIDO', boxX+boxW/2, boxY+58);
@@ -361,10 +445,6 @@ function drawReceiptToCanvas(v){
   ctx.textAlign='left';
   ctx.fillStyle=fg; ctx.font='14px Arial'; ctx.fillText('Fecha de Emisión', boxX, boxY+150);
   ctx.font='bold 14px Arial'; ctx.fillText(v.fecha, boxX+160, boxY+150);
-  // Hora de transacción
-  const hora=(v.fecha||'').split(' ')[1]||'';
-  ctx.fillStyle=fg; ctx.font='14px Arial'; ctx.fillText('Hora de transacción', boxX, boxY+170);
-  ctx.font='bold 14px Arial'; ctx.fillText(hora, boxX+160, boxY+170);
   const thY = boxY+190;
   ctx.fillStyle=green; ctx.fillRect(50, thY, W-100, 28);
   ctx.fillStyle='#ffffff'; ctx.font='bold 14px Arial'; ctx.fillText('DETALLE DEL DOCUMENTO', 60, thY+19);
@@ -374,7 +454,7 @@ function drawReceiptToCanvas(v){
   ctx.fillText('Nombre', 60, rowStart+18);
   ctx.fillText('Cantidad', 520, rowStart+18);
   ctx.fillText('P. Unitario', 660, rowStart+18);
-  ctx.textAlign='right'; ctx.fillText('Subtotal', 1040, rowStart+18); ctx.textAlign='left';
+  ctx.ctx.textAlign = 'right'; fillText('Subtotal', width - 20, ySubtotal);
   let iy=rowStart+40;
   ctx.font='13px Arial'; ctx.fillStyle=fg;
   for(const it of v.items){
@@ -394,11 +474,11 @@ function drawReceiptToCanvas(v){
   ctx.font='13px Arial'; ctx.fillStyle=fg;
   const labelX = sumX + 20; const amountX = sumX + sumW - 20;
   ctx.textAlign='left'; ctx.fillText('Neto:', labelX, sumY+32);
-  ctx.textAlign='right'; ctx.fillText(money(v.neto), amountX, sumY+32);
+  ctx.textAlign='right'; const qtyTotalRec = (v.items||[]).reduce((a,b)=>a+(b.qty||0),0);
+  ctx.fillText(String(qtyTotalRec), amountX, sumY+32);
   ctx.textAlign='left'; ctx.fillText('IVA ('+v.ivaRate+'%):', labelX, sumY+56);
-  ctx.textAlign='right'; ctx.fillText(money(v.iva), amountX, sumY+56);
-  ctx.font='bold 15px Arial';
-  ctx.textAlign='left'; ctx.fillText('Total:', labelX, sumY+80);
+  ctx.textAlign='right'; ctx.font='bold 15px Arial';
+  ctx.textAlign='left'; ctx.fillText('Venta Total:', labelX, sumY+80);
   ctx.textAlign='right'; ctx.fillText(money(v.total), amountX, sumY+80);
   ctx.textAlign='left';
   return canvas;
@@ -461,7 +541,6 @@ function renderVentaDetalleHTML(v){
     ${items}
     <hr/>
     <div style="display:flex;justify-content:space-between;"><span>Neto</span><strong>${fmt.format(v.neto)}</strong></div>
-    <div style="display:flex;justify-content:space-between;"><span>IVA (${v.ivaRate}%)</span><strong>${fmt.format(v.iva)}</strong></div>
     <div style="display:flex;justify-content:space-between;"><span>Total</span><strong>${fmt.format(v.total)}</strong></div>
     <div style="display:flex; justify-content:flex-end; margin-top:8px;">
       <button class="btn icon-btn" onclick="compartirDesdeHist(${v.correlativo})" title="Compartir" aria-label="Compartir">
@@ -521,6 +600,17 @@ function editarProducto(id){ const productos=store.get('productos',[]); const p=
 function eliminarProducto(id){ const productos=store.get('productos',[]).filter(x=>x.id!==id); store.set('productos',productos); renderCatalogo(); }
 
 (function(){ const s=getSession(); if(s){ bootApp(); } else { $('view-auth').classList.remove('hidden'); } })();
+
+function showToast(msg){
+  try{
+    const el = document.getElementById('appToast'); if(!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer = setTimeout(()=>{ el.classList.remove('show'); }, 2400);
+  }catch(e){ /* no-op */ }
+}
+
 </script>
 </body>
 </html>
